@@ -7,7 +7,7 @@
     <meta name="description" content="SARTORCHI（サルトーチ）は完全オーダーメイドのビスポークテーラリング。あなたの身体と人生に寄り添う一着を、¥50,000から。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Serif+JP:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&family=Noto+Serif+JP:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -45,6 +45,18 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--copper); }
 
         .en { font-family: 'Cormorant Garamond', serif; letter-spacing: 0.1em; }
+
+        /* 数字まわりは高級感のあるシンプルなサンセリフで統一 */
+        .stat .v,
+        .price-card .p-price,
+        .sample-total .amt,
+        .student-banner .sb-off,
+        .flow-dot,
+        .sec-no,
+        .value .v-no {
+            font-family: 'Jost', sans-serif !important;
+            font-weight: 400;
+        }
 
         /* ===================== Progress bar ===================== */
         .progress {
@@ -148,16 +160,19 @@
         nav ul a:hover::after { width: 100%; }
 
         .nav-cta {
-            padding: 11px 28px;
-            border: 1px solid var(--copper);
-            color: var(--copper-light) !important;
+            font-family: 'Noto Serif JP', serif !important;
+            font-size: 13px !important;
+            letter-spacing: 0.2em !important;
+            padding: 10px 24px;
+            background: var(--copper);
+            color: #fff !important;
             border-radius: 2px;
         }
 
         .nav-cta::after { display: none; }
 
         .nav-cta:hover {
-            background: var(--copper);
+            background: var(--copper-light);
             color: #fff !important;
         }
 
@@ -572,18 +587,50 @@
             letter-spacing: 0.1em;
         }
 
-        /* ===================== Collection ===================== */
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        /* ===================== Collection (carousel) ===================== */
+        .carousel { position: relative; }
+
+        .carousel-track {
+            display: flex;
             gap: 22px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
         }
+
+        .carousel-track::-webkit-scrollbar { display: none; }
+
+        .car-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            border: 1px solid var(--copper);
+            background: rgba(250, 248, 244, 0.92);
+            color: var(--copper);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+        }
+
+        .car-btn:hover { background: var(--copper); color: #fff; }
+        .car-btn.prev { left: -10px; }
+        .car-btn.next { right: -10px; }
 
         .g-cell {
             position: relative;
             overflow: hidden;
             aspect-ratio: 3/4;
             cursor: pointer;
+            flex: 0 0 calc((100% - 44px) / 3);
+            scroll-snap-align: start;
         }
 
         .g-cell img {
@@ -1289,7 +1336,11 @@
             .stat { padding: 18px 8px; }
             .values { grid-template-columns: 1fr; }
             .philosophy .container { grid-template-columns: 1fr; gap: 60px; }
-            .gallery { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+            .carousel-track { gap: 14px; }
+            .g-cell { flex-basis: calc((100% - 14px) / 2); }
+            .car-btn { width: 42px; height: 42px; }
+            .car-btn.prev { left: 4px; }
+            .car-btn.next { right: 4px; }
             .pricing { grid-template-columns: 1fr; }
             .samples { grid-template-columns: 1fr; }
             .access-grid { grid-template-columns: 1fr; gap: 44px; }
@@ -1301,8 +1352,12 @@
         }
 
         @media (max-width: 560px) {
-            .gallery { grid-template-columns: 1fr; }
+            .g-cell { flex-basis: 82%; }
             .hero-actions .btn { width: 100%; justify-content: center; }
+            .hero h1 { font-size: 25px; letter-spacing: 0.03em; line-height: 1.7; }
+            .hero-sub { font-size: 14px; letter-spacing: 0.06em; }
+            .hero-note { font-size: 11.5px; letter-spacing: 0.06em; }
+            .contact .lead br { display: none; }
         }
     </style>
 </head>
@@ -1417,31 +1472,35 @@
                 <h2 class="sec-label">Collection</h2>
             </div>
             <p class="sec-jp reveal reveal-delay-1">仕立ての記録</p>
-            <div class="gallery">
-                <div class="g-cell reveal">
-                    <img src="images/gallery1.jpg" alt="グレースリーピース">
-                    <div class="g-cap"><span class="t">Grey Three-Piece</span><span class="s">グレー スリーピース</span></div>
+            <div class="carousel reveal">
+                <div class="carousel-track" id="galTrack">
+                    <div class="g-cell">
+                        <img src="images/gallery1.jpg" alt="グレースリーピース">
+                        <div class="g-cap"><span class="t">Grey Three-Piece</span><span class="s">グレー スリーピース</span></div>
+                    </div>
+                    <div class="g-cell">
+                        <img src="images/gallery2.jpg" alt="ティールスーツ ロンドン柄裏地">
+                        <div class="g-cap"><span class="t">Teal × London Lining</span><span class="s">遊び心の裏地</span></div>
+                    </div>
+                    <div class="g-cell">
+                        <img src="images/gallery3.jpg" alt="グレンチェックスーツ">
+                        <div class="g-cap"><span class="t">Glen Check</span><span class="s">グレンチェック</span></div>
+                    </div>
+                    <div class="g-cell">
+                        <img src="images/gallery4.jpg" alt="ベージュダブルスーツ">
+                        <div class="g-cap"><span class="t">Beige Double</span><span class="s">ベージュ ダブル</span></div>
+                    </div>
+                    <div class="g-cell">
+                        <img src="images/gallery5.jpg" alt="金ボタンダブルスーツ">
+                        <div class="g-cap"><span class="t">Gold Button Double</span><span class="s">金釦 ダブル</span></div>
+                    </div>
+                    <div class="g-cell">
+                        <img src="images/hero.jpg" alt="ネイビースリーピース">
+                        <div class="g-cap"><span class="t">Navy Three-Piece</span><span class="s">ネイビー スリーピース</span></div>
+                    </div>
                 </div>
-                <div class="g-cell reveal reveal-delay-1">
-                    <img src="images/gallery2.jpg" alt="ティールスーツ ロンドン柄裏地">
-                    <div class="g-cap"><span class="t">Teal × London Lining</span><span class="s">遊び心の裏地</span></div>
-                </div>
-                <div class="g-cell reveal reveal-delay-2">
-                    <img src="images/gallery3.jpg" alt="グレンチェックスーツ">
-                    <div class="g-cap"><span class="t">Glen Check</span><span class="s">グレンチェック</span></div>
-                </div>
-                <div class="g-cell reveal">
-                    <img src="images/gallery4.jpg" alt="ベージュダブルスーツ">
-                    <div class="g-cap"><span class="t">Beige Double</span><span class="s">ベージュ ダブル</span></div>
-                </div>
-                <div class="g-cell reveal reveal-delay-1">
-                    <img src="images/gallery5.jpg" alt="金ボタンダブルスーツ">
-                    <div class="g-cap"><span class="t">Gold Button Double</span><span class="s">金釦 ダブル</span></div>
-                </div>
-                <div class="g-cell reveal reveal-delay-2">
-                    <img src="images/hero.jpg" alt="ネイビースリーピース">
-                    <div class="g-cap"><span class="t">Navy Three-Piece</span><span class="s">ネイビー スリーピース</span></div>
-                </div>
+                <button class="car-btn prev" type="button" aria-label="前へ" onclick="slideGallery(-1)">←</button>
+                <button class="car-btn next" type="button" aria-label="次へ" onclick="slideGallery(1)">→</button>
             </div>
         </div>
     </section>
@@ -1785,6 +1844,14 @@
         }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
 
         document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // Collection carousel
+        function slideGallery(dir) {
+            const track = document.getElementById('galTrack');
+            const cell = track.querySelector('.g-cell');
+            const gap = parseFloat(getComputedStyle(track).gap) || 0;
+            track.scrollBy({ left: dir * (cell.offsetWidth + gap), behavior: 'smooth' });
+        }
 
         // Q&A accordion
         document.querySelectorAll('.qa-q').forEach(q => {
